@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YMJ Book - Musical Coloring Experience</title>
     <style>
-        /* --- RESET & VARIABLES --- */
         :root {
             --primary-color: #FF6B6B;
             --secondary-color: #4ECDC4;
@@ -30,7 +29,6 @@
             flex-direction: column;
         }
 
-        /* --- LAYOUT UTAMA --- */
         header {
             background-color: white;
             padding: 1rem 2rem;
@@ -49,6 +47,7 @@
             color: var(--primary-color);
             text-decoration: none;
             letter-spacing: -1px;
+            cursor: pointer;
         }
         .logo span { color: var(--dark-color); }
 
@@ -75,9 +74,9 @@
             width: 100%;
         }
 
-        /* --- HALAMAN LIBRARY (DAFTAR BUKU) --- */
+        /* --- LIBRARY VIEW --- */
         #library-view { display: block; }
-        
+
         .hero {
             text-align: center;
             margin-bottom: 3rem;
@@ -92,14 +91,19 @@
         .book-section { margin-bottom: 3rem; }
         .section-title {
             font-size: 1.5rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
             border-left: 5px solid var(--primary-color);
             padding-left: 1rem;
+        }
+        .section-desc {
+            margin-bottom: 1.5rem;
+            color: #666;
+            padding-left: 1.25rem;
         }
 
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 1.5rem;
         }
 
@@ -108,28 +112,56 @@
             border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
             text-decoration: none;
             color: inherit;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
-
-        .card:hover { transform: translateY(-5px); }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
 
         .card-img {
             width: 100%;
-            height: 150px;
+            height: 140px;
             object-fit: cover;
             background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card-img .placeholder-icon {
+            font-size: 3rem;
+            opacity: 0.3;
+        }
+
+        /* Badge untuk tanpa audio */
+        .card.no-audio::after {
+            content: 'Tanpa Audio';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 10px;
         }
 
         .card-body { padding: 1rem; flex: 1; }
-        .card-title { font-weight: 700; margin-bottom: 0.5rem; color: var(--dark-color); }
-        .card-subtitle { font-size: 0.9rem; color: #888; }
+        .card-title { font-weight: 700; margin-bottom: 0.3rem; color: var(--dark-color); font-size: 0.95rem; }
+        .card-subtitle { font-size: 0.8rem; color: #999; }
 
-        /* --- HALAMAN PLAYER (MUSIK) --- */
+        /* --- PLAYER VIEW --- */
         #player-view { display: none; }
 
         .player-container {
@@ -140,6 +172,7 @@
             border-radius: 20px;
             box-shadow: var(--shadow);
             text-align: center;
+            position: relative;
         }
 
         .back-btn {
@@ -149,20 +182,46 @@
             text-decoration: none;
             cursor: pointer;
             font-size: 0.9rem;
+            transition: color 0.2s;
         }
         .back-btn:hover { color: var(--primary-color); }
+
+        .album-art-wrapper {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 2rem;
+        }
 
         .album-art {
             width: 200px;
             height: 200px;
             border-radius: 50%;
             object-fit: cover;
-            margin: 0 auto 2rem;
             border: 5px solid var(--light-color);
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .album-art.playing {
             animation: pulse 2s infinite ease-in-out;
         }
-        
+
+        .album-art-placeholder {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+            border: 5px solid var(--light-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .album-art-placeholder.playing {
+            animation: pulse 2s infinite ease-in-out;
+        }
+
         @keyframes pulse {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.4); }
             70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(78, 205, 196, 0); }
@@ -170,10 +229,47 @@
         }
 
         .track-info h2 { margin-bottom: 0.5rem; color: var(--dark-color); }
-        .track-info p { color: var(--primary-color); font-weight: 600; margin-bottom: 2rem; }
+        .track-info p { color: var(--primary-color); font-weight: 600; margin-bottom: 1.5rem; }
+
+        /* Status bar */
+        .audio-status {
+            font-size: 0.8rem;
+            color: #999;
+            margin-bottom: 1rem;
+            min-height: 1.2em;
+            transition: color 0.3s;
+        }
+        .audio-status.error { color: var(--primary-color); font-weight: 600; }
+        .audio-status.loading { color: var(--secondary-color); }
+
+        /* Progress bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: var(--light-color);
+            border-radius: 3px;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+        }
 
         .controls { display: flex; justify-content: center; align-items: center; gap: 1.5rem; }
-        
+
         .control-btn {
             background: var(--light-color);
             border: none;
@@ -198,8 +294,13 @@
             box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4);
         }
         .play-btn:hover { background: #ff5252; transform: scale(1.05); }
+        .play-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
 
-        /* --- MODAL INSTRUKSI --- */
+        /* --- MODAL --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -213,24 +314,29 @@
             background: white;
             padding: 2rem;
             border-radius: var(--radius);
-            max-width: 600px;
+            max-width: 650px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
         }
         .modal-content h2 { color: var(--dark-color); margin-bottom: 1rem; }
-        .modal-content ul { margin-left: 1.5rem; margin-bottom: 1.5rem; }
+        .modal-content h3 { color: var(--dark-color); margin: 1.5rem 0 0.5rem; }
+        .modal-content ol, .modal-content ul { margin-left: 1.5rem; margin-bottom: 1rem; }
         .modal-content li { margin-bottom: 0.5rem; }
         .code-block {
-            background: #f4f4f4;
+            background: #2d2d2d;
+            color: #f8f8f2;
             padding: 1rem;
             border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
             overflow-x: auto;
             margin-bottom: 1rem;
-            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            word-break: break-all;
         }
+        .code-block .wrong { color: #ff6b6b; text-decoration: line-through; }
+        .code-block .correct { color: #4ECDC4; }
         .close-modal {
             background: var(--dark-color);
             color: white;
@@ -240,8 +346,39 @@
             cursor: pointer;
             float: right;
         }
+        .close-modal:hover { background: #1a252f; }
 
-        /* --- FOOTER --- */
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        .warning-box strong { color: #856404; }
+
+        /* --- TOAST NOTIFICATION --- */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--dark-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 300;
+            opacity: 0;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
         footer {
             text-align: center;
             padding: 2rem;
@@ -249,255 +386,176 @@
             color: white;
             margin-top: auto;
         }
-        footer a { color: var(--accent-color); text-decoration: none; }
 
-        /* RESPONSIVE */
         @media (max-width: 600px) {
             .hero h1 { font-size: 1.8rem; }
-            .player-container { padding: 1.5rem; }
-            .album-art { width: 150px; height: 150px; }
+            main { padding: 1rem; }
+            .player-container { padding: 1.5rem; margin: 1rem auto; }
+            .album-art, .album-art-placeholder { width: 150px; height: 150px; }
+            .cards-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
     <header>
-        <a href="#" class="logo" onclick="app.showLibrary()">YMJ <span>Book</span></a>
+        <a class="logo" onclick="app.showLibrary()">YMJ <span>Book</span></a>
         <button class="nav-btn" onclick="app.toggleModal(true)">Panduan Upload</button>
     </header>
 
     <main>
-        <!-- VIEW 1: LIBRARY (Daftar Buku & Instrumen) -->
+        <!-- VIEW 1: LIBRARY -->
         <section id="library-view">
             <div class="hero">
                 <h1>Selamat Datang di YMJ Book</h1>
                 <p>Scan QR Code di buku mewarnai untuk mendengar suaranya!</p>
             </div>
-
-            <!-- Container Buku akan di-generate oleh JavaScript di sini -->
             <div id="books-container"></div>
         </section>
 
-        <!-- VIEW 2: PLAYER (Pemutar Musik) -->
+        <!-- VIEW 2: PLAYER -->
         <section id="player-view">
             <div class="player-container">
-                <a href="#" class="back-btn" onclick="app.showLibrary()">&larr; Kembali ke Daftar</a>
-                
-                <img src="" alt="Instrument Cover" id="player-img" class="album-art">
-                
+                <a href="#" class="back-btn" onclick="app.showLibrary(); return false;">&larr; Kembali ke Daftar</a>
+
+                <div class="album-art-wrapper" id="album-art-wrapper">
+                    <!-- Diisi动态 oleh JS -->
+                </div>
+
                 <div class="track-info">
-                    <h2 id="player-title">Judul Lagu</h2>
-                    <p id="player-instrument">Nama Alat Musik</p>
+                    <h2 id="player-title">Judul</h2>
+                    <p id="player-instrument">Instrumen</p>
+                </div>
+
+                <div class="audio-status" id="audio-status"></div>
+
+                <div class="progress-container" id="progress-container" onclick="app.seekAudio(event)">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="time-display">
+                    <span id="time-current">0:00</span>
+                    <span id="time-total">0:00</span>
                 </div>
 
                 <div class="controls">
-                    <button class="control-btn" onclick="app.resetAudio()">&#8635;</button> <!-- Reset Icon -->
-                    <button class="control-btn play-btn" id="play-btn" onclick="app.togglePlay()">&#9658;</button> <!-- Play Icon -->
-                    <button class="control-btn" onclick="app.toggleMute()">&#128266;</button> <!-- Volume Icon -->
+                    <button class="control-btn" onclick="app.resetAudio()" title="Ulangi">&#8635;</button>
+                    <button class="control-btn play-btn" id="play-btn" onclick="app.togglePlay()" disabled>&#9658;</button>
+                    <button class="control-btn" id="mute-btn" onclick="app.toggleMute()" title="Mute">&#128266;</button>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Modal Instruksi -->
-    <div id="instruction-modal" class="modal-overlay">
+    <!-- MODAL -->
+    <div id="instruction-modal" class="modal-overlay" onclick="if(event.target===this)app.toggleModal(false)">
         <div class="modal-content">
             <button class="close-modal" onclick="app.toggleModal(false)">Tutup</button>
-            <h2>Cara Upload MP3 & Mengatur Link</h2>
-            <p>Karena ini adalah file HTML statis, Anda tidak bisa "upload" file langsung ke sini seperti di Instagram. Anda harus menghosting file MP3 Anda terlebih dahulu.</p>
-            <br>
-            <h3>Langkah-langkah:</h3>
-            <ol>
-                <li><strong>Siapkan File MP3:</strong> Pastikan nama file unik (contoh: <code>piano-buku1.mp3</code>).</li>
-                <li><strong>Upload ke Cloud Hosting:</strong> Gunakan layanan seperti Google Drive (set ke publik), Dropbox, atau hosting cPanel Anda.</li>
-                <li><strong>Copy Link Langsung (Direct Link):</strong> Pastikan link berakhiran <code>.mp3</code>, bukan halaman preview.</li>
-                <li><strong>Edit Kode:</strong> Buka file HTML ini, cari bagian JavaScript di bawah, dan ganti link dummy di dalam variabel <code>booksData</code>.</li>
-                <li><strong>Buat QR Code:</strong> Gunakan link website + parameter.
-                    <br><em>Contoh: <code>websiteanda.com?book=1&page=2</code></em>
-                </li>
-            </ol>
-            
-            <h3>Contoh Struktur Data di Kode:</h3>
-            <div class="code-block">
-{
-  id: 1,
-  title: "Buku Mewarnai Vol. 1",
-  pages: [
-    { id: 1, title: "Piano", audio: "LINK_MP3_DISINI" },
-    { id: 2, title: "Gitar", audio: "LINK_MP3_DISINI" }
-  ]
-}
+            <h2>Cara Upload MP3 ke GitHub & Mengatur Link</h2>
+
+            <div class="warning-box">
+                <strong>&#9888; Kesalahan Umum:</strong> Link seperti 
+                <code>github.com/user/repo/blob/main/file.mp3</code> 
+                adalah halaman web, BUKAN file MP3! Browser tidak bisa memutarnya.
             </div>
+
+            <h3>Perbedaan Link:</h3>
+            <div class="code-block"><span class="wrong">https://github.com/user/repo/blob/main/file.mp3</span>
+<span class="correct">https://raw.githubusercontent.com/user/repo/main/file.mp3</span></div>
+
+            <h3>Langkah yang Benar:</h3>
+            <ol>
+                <li><strong>Upload file MP3</strong> ke repository GitHub kamu (drag & drop ke browser atau pakai Git).</li>
+                <li><strong>Klik file MP3</strong> di GitHub, lalu klik tombol <strong>"Raw"</strong> di pojok kanan atas.</li>
+                <li><strong>Copy URL dari halaman Raw</strong> itu — harus dimulai dengan <code>raw.githubusercontent.com</code>.</li>
+                <li><strong>Paste ke kode</strong> di bagian <code>audioUrl</code> di variabel <code>booksData</code>.</li>
+            </ol>
+
+            <h3>Contoh di Kode:</h3>
+            <div class="code-block">{
+  id: 1,
+  title: "Violin Sound",
+  instrument: "Piano",
+  audioUrl: "https://raw.githubusercontent.com/USERNAME/REPO/main/file.mp3"
+}</div>
+
+            <h3>Batasan GitHub:</h3>
+            <ul>
+                <li>Ukuran file maksimal <strong>25 MB</strong> per file.</li>
+                <li>Jika file lebih besar, gunakan layanan lain seperti Dropbox (direct link), Cloudflare R2, atau hosting sendiri.</li>
+                <li>GitHub Pages juga bisa dipakai, tapi tetap pakai path <code>/file.mp3</code> bukan <code>/blob/main/file.mp3</code>.</li>
+            </ul>
         </div>
     </div>
 
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
     <footer>
-        <p>&copy; 2023 YMJ Book. Educational Musical Coloring Book.</p>
+        <p>&copy; 2026 YMJ Book. Educational Musical Coloring Book.</p>
     </footer>
 
-    <!-- AUDIO PLAYER HIDDEN -->
-    <audio id="audio-element"></audio>
+    <audio id="audio-element" preload="auto"></audio>
 
     <script>
         /**
-         * KONFIGURASI DATA BUKU
-         * Ganti 'audioUrl' dengan link MP3 asli Anda nanti.
-         * Ganti 'imgUrl' dengan link gambar alat musik Anda.
+         * ============================================
+         *  DATA BUKU - GANTI audioUrl DENGAN RAW LINK
+         * ============================================
+         * 
+         * CARA DAPATKAN RAW LINK:
+         * 1. Buka file MP3 di GitHub
+         * 2. Klik tombol "Raw" di atas kanan
+         * 3. Copy URL-nya (harus berawalan raw.githubusercontent.com)
          */
+
+        // Ikon placeholder untuk setiap instrumen (emoji)
+        const instrumentIcons = {
+            'Piano': '🎹', 'Violin Sound': '🎻', 'Viola': '🎻', 'Cello': '🎻',
+            'Contrabass': '🎻', 'String Section': '🎵', 'Flute': '🪈',
+            'Oboe': '🪈', 'Clarinet': '🪈', 'Bassoon': '🪈',
+            'Woodwind Section': '🎵', 'French horn': '🎺', 'Trumpet': '🎺',
+            'Trombone': '🎺', 'Tuba': '🎺', 'Brass Section': '🎵',
+            'Snare Drum': '🥁', 'Xylophone': '🎵', 'Cymbals': '🥁',
+            'Drumset': '🥁', 'Percussion Section': '🥁',
+            'Biola': '🎻', 'Saksofon': '🎷'
+        };
+
         const booksData = [
             {
                 id: 1,
                 title: "Buku Mewarnai Yumi 1",
-                description: "Audio Musik Buku Mewarnai",
+                description: "Audio Musik Buku Mewarnai - Orkestra Lengkap",
                 pages: [
                     { 
                         id: 1, 
                         title: "Violin Sound", 
                         instrument: "Piano",
-                        imgUrl: "", 
-                        audioUrl: "https://github.com/remonyayasanmusikjakarta-sketch/YMJBook/blob/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" // Ganti ini
+                        // ⬇️ INI YANG SALAH: link blob/github page, bukan raw file
+                        // audioUrl: "https://github.com/reemonyayasanmusikjakarta-sketch/YMJBook/blob/main/Massenet_Thaïs...mp3"
+                        // 
+                        // ⬇️ INI YANG BENAR: pakai raw.githubusercontent.com
+                        audioUrl: "https://raw.githubusercontent.com/reemonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3"
                     },
-                    { 
-                        id: 2, 
-                        title: "Viola", 
-                        instrument: "Viola",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 3, 
-                        title: "Cello", 
-                        instrument: "Cello",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 4, 
-                        title: "Contrabass", 
-                        instrument: "Contrabass",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 5, 
-                        title: "String Section", 
-                        instrument: "String Section",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 6, 
-                        title: "Flute", 
-                        instrument: "Flute",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 7, 
-                        title: "Oboe", 
-                        instrument: "Oboe",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 8, 
-                        title: "Clarinet", 
-                        instrument: "Clarinet",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 9, 
-                        title: "Bassoon", 
-                        instrument: "Bassoon",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 10, 
-                        title: "Woodwind Section", 
-                        instrument: "Woodwind Section",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 11, 
-                        title: "French horn", 
-                        instrument: "French horn",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 12, 
-                        title: "Trumpet", 
-                        instrument: "Trumpet",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 13, 
-                        title: "Trombone", 
-                        instrument: "Trombone",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 14, 
-                        title: "Tuba", 
-                        instrument: "Tuba",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 15, 
-                        title: "Brass Section", 
-                        instrument: "Brass Section",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 16, 
-                        title: "Snare Drum", 
-                        instrument: "Snare Drum",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 17, 
-                        title: "Xylophone", 
-                        instrument: "Xylophone",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 18, 
-                        title: "Cymbals", 
-                        instrument: "Cymbals",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 19, 
-                        title: "Drumset", 
-                        instrument: "Drumset",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 20, 
-                        title: "Percussion Section", 
-                        instrument: "Percussion Section",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    },
-                    { 
-                        id: 21, 
-                        title: "Piano", 
-                        instrument: "Piano",
-                        imgUrl: "", 
-                        audioUrl: "" // Ganti ini
-                    }
+                    { id: 2, title: "Viola", instrument: "Viola", audioUrl: "" },
+                    { id: 3, title: "Cello", instrument: "Cello", audioUrl: "" },
+                    { id: 4, title: "Contrabass", instrument: "Contrabass", audioUrl: "" },
+                    { id: 5, title: "String Section", instrument: "String Section", audioUrl: "" },
+                    { id: 6, title: "Flute", instrument: "Flute", audioUrl: "" },
+                    { id: 7, title: "Oboe", instrument: "Oboe", audioUrl: "" },
+                    { id: 8, title: "Clarinet", instrument: "Clarinet", audioUrl: "" },
+                    { id: 9, title: "Bassoon", instrument: "Bassoon", audioUrl: "" },
+                    { id: 10, title: "Woodwind Section", instrument: "Woodwind Section", audioUrl: "" },
+                    { id: 11, title: "French horn", instrument: "French horn", audioUrl: "" },
+                    { id: 12, title: "Trumpet", instrument: "Trumpet", audioUrl: "" },
+                    { id: 13, title: "Trombone", instrument: "Trombone", audioUrl: "" },
+                    { id: 14, title: "Tuba", instrument: "Tuba", audioUrl: "" },
+                    { id: 15, title: "Brass Section", instrument: "Brass Section", audioUrl: "" },
+                    { id: 16, title: "Snare Drum", instrument: "Snare Drum", audioUrl: "" },
+                    { id: 17, title: "Xylophone", instrument: "Xylophone", audioUrl: "" },
+                    { id: 18, title: "Cymbals", instrument: "Cymbals", audioUrl: "" },
+                    { id: 19, title: "Drumset", instrument: "Drumset", audioUrl: "" },
+                    { id: 20, title: "Percussion Section", instrument: "Percussion Section", audioUrl: "" },
+                    { id: 21, title: "Piano", instrument: "Piano", audioUrl: "" }
                 ]
             },
             {
@@ -509,31 +567,40 @@
                         id: 1, 
                         title: "Biola Elegan", 
                         instrument: "Biola",
-                        imgUrl: "https://picsum.photos/seed/violin/300/300", 
                         audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" 
                     },
                     { 
                         id: 2, 
                         title: "Saksofon Jazz", 
                         instrument: "Saksofon",
-                        imgUrl: "https://picsum.photos/seed/sax/300/300", 
                         audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" 
                     }
                 ]
             }
         ];
 
+
         // --- APLIKASI UTAMA ---
         const app = {
             audio: document.getElementById('audio-element'),
             isPlaying: false,
+            currentTimeInterval: null,
 
             init: function() {
                 this.renderLibrary();
                 this.checkUrlParams();
+
+                // Event listener untuk audio
+                this.audio.addEventListener('loadedmetadata', () => this.onAudioLoaded());
+                this.audio.addEventListener('timeupdate', () => this.updateProgress());
+                this.audio.addEventListener('ended', () => this.onAudioEnded());
+                this.audio.addEventListener('error', (e) => this.onAudioError(e));
+                this.audio.addEventListener('canplay', () => this.onCanPlay());
+                this.audio.addEventListener('waiting', () => this.onAudioWaiting());
+                this.audio.addEventListener('playing', () => this.onAudioPlaying());
             },
 
-            // Render daftar buku di halaman utama
+            // --- RENDERING ---
             renderLibrary: function() {
                 const container = document.getElementById('books-container');
                 let html = '';
@@ -542,17 +609,24 @@
                     html += `
                         <div class="book-section">
                             <h2 class="section-title">${book.title}</h2>
-                            <p style="margin-bottom: 1rem; color: #666;">${book.description}</p>
+                            <p class="section-desc">${book.description}</p>
                             <div class="cards-grid">
                     `;
 
                     book.pages.forEach(page => {
+                        const hasAudio = page.audioUrl && page.audioUrl.trim() !== '';
+                        const icon = instrumentIcons[page.title] || instrumentIcons[page.instrument] || '🎵';
+                        
                         html += `
-                            <a href="?book=${book.id}&page=${page.id}" class="card">
-                                <img src="${page.imgUrl}" alt="${page.title}" class="card-img">
+                            <a href="?book=${book.id}&page=${page.id}" 
+                               class="card ${hasAudio ? '' : 'no-audio'}" 
+                               ${!hasAudio ? 'onclick="app.showToast(\'Audio belum tersedia untuk halaman ini\'); return false;"' : ''}>
+                                <div class="card-img">
+                                    <span class="placeholder-icon">${icon}</span>
+                                </div>
                                 <div class="card-body">
                                     <div class="card-title">${page.title}</div>
-                                    <div class="card-subtitle">Klik untuk dengarkan</div>
+                                    <div class="card-subtitle">${hasAudio ? 'Klik untuk dengarkan' : 'Belum ada audio'}</div>
                                 </div>
                             </a>
                         `;
@@ -564,7 +638,7 @@
                 container.innerHTML = html;
             },
 
-            // Cek apakah URL punya parameter buku & halaman (untuk QR Code)
+            // --- URL PARAMS (QR Code support) ---
             checkUrlParams: function() {
                 const params = new URLSearchParams(window.location.search);
                 const bookId = parseInt(params.get('book'));
@@ -575,44 +649,56 @@
                 }
             },
 
-            // Load tampilan player beserta datanya
+            // --- PLAYER ---
             loadPlayer: function(bookId, pageId) {
-                // Cari data
                 const book = booksData.find(b => b.id === bookId);
                 if (!book) return this.showLibrary();
 
                 const page = book.pages.find(p => p.id === pageId);
                 if (!page) return this.showLibrary();
 
-                // Update UI Player
+                // Validasi audio
+                if (!page.audioUrl || page.audioUrl.trim() === '') {
+                    this.showToast('Audio belum tersedia untuk halaman ini');
+                    return this.showLibrary();
+                }
+
+                // Switch view
                 document.getElementById('library-view').style.display = 'none';
                 document.getElementById('player-view').style.display = 'block';
-                
-                document.getElementById('player-img').src = page.imgUrl;
+
+                // Set info
                 document.getElementById('player-title').innerText = page.title;
                 document.getElementById('player-instrument').innerText = "Instrumen: " + page.instrument;
                 document.title = "YMJ Book - " + page.title;
 
-                // Set Audio
+                // Set album art (emoji placeholder)
+                const icon = instrumentIcons[page.title] || instrumentIcons[page.instrument] || '🎵';
+                document.getElementById('album-art-wrapper').innerHTML = 
+                    `<div class="album-art-placeholder" id="album-art">${icon}</div>`;
+
+                // Reset state
+                this.resetProgressUI();
+                this.setStatus('Memuat audio...', 'loading');
+                document.getElementById('play-btn').disabled = true;
+
+                // Set & load audio
                 this.audio.src = page.audioUrl;
-                this.playAudio();
-                
-                // Scroll ke atas
-                window.scrollTo(0,0);
+                this.audio.load();
+
+                window.scrollTo(0, 0);
             },
 
-            // Kembali ke tampilan daftar
             showLibrary: function() {
                 document.getElementById('player-view').style.display = 'none';
                 document.getElementById('library-view').style.display = 'block';
                 document.title = "YMJ Book - Musical Coloring Experience";
                 this.stopAudio();
-                
-                // Bersihkan URL parameter
+                clearInterval(this.currentTimeInterval);
                 window.history.pushState({}, document.title, window.location.pathname);
             },
 
-            // Kontrol Audio
+            // --- AUDIO CONTROLS ---
             togglePlay: function() {
                 if (this.isPlaying) {
                     this.pauseAudio();
@@ -622,17 +708,23 @@
             },
 
             playAudio: function() {
-                this.audio.play();
-                this.isPlaying = true;
-                document.getElementById('play-btn').innerHTML = "&#10074;&#10074;"; // Pause Icon
-                document.querySelector('.album-art').style.animationPlayState = 'running';
+                this.audio.play().then(() => {
+                    this.isPlaying = true;
+                    document.getElementById('play-btn').innerHTML = "&#10074;&#10074;";
+                    const art = document.getElementById('album-art');
+                    if (art) art.classList.add('playing');
+                }).catch(err => {
+                    console.error('Play error:', err);
+                    this.setStatus('Gagal memutar audio', 'error');
+                });
             },
 
             pauseAudio: function() {
                 this.audio.pause();
                 this.isPlaying = false;
-                document.getElementById('play-btn').innerHTML = "&#9658;"; // Play Icon
-                document.querySelector('.album-art').style.animationPlayState = 'paused';
+                document.getElementById('play-btn').innerHTML = "&#9658;";
+                const art = document.getElementById('album-art');
+                if (art) art.classList.remove('playing');
             },
 
             stopAudio: function() {
@@ -649,18 +741,114 @@
 
             toggleMute: function() {
                 this.audio.muted = !this.audio.muted;
+                document.getElementById('mute-btn').innerHTML = this.audio.muted ? '&#128263;' : '&#128266;';
+            },
+
+            seekAudio: function(event) {
+                const container = document.getElementById('progress-container');
+                const rect = container.getBoundingClientRect();
+                const percent = (event.clientX - rect.left) / rect.width;
+                if (this.audio.duration && isFinite(this.audio.duration)) {
+                    this.audio.currentTime = percent * this.audio.duration;
+                }
+            },
+
+            // --- AUDIO EVENTS ---
+            onAudioLoaded: function() {
+                document.getElementById('time-total').innerText = this.formatTime(this.audio.duration);
+            },
+
+            onCanPlay: function() {
+                document.getElementById('play-btn').disabled = false;
+                this.setStatus('Siap diputar', '');
+                // Auto-play
+                this.playAudio();
+            },
+
+            onAudioPlaying: function() {
+                this.setStatus('Sedang memutar...', '');
+            },
+
+            onAudioWaiting: function() {
+                this.setStatus('Buffering...', 'loading');
+            },
+
+            onAudioError: function(e) {
+                console.error('Audio error:', e);
+                const art = document.getElementById('album-art');
+                if (art) art.classList.remove('playing');
+                document.getElementById('play-btn').disabled = true;
+                this.isPlaying = false;
+                document.getElementById('play-btn').innerHTML = "&#9658;";
+
+                // Deteksi jenis error
+                const src = this.audio.src;
+                let errorMsg = 'Gagal memuat audio.';
+                
+                if (src.includes('github.com/') && !src.includes('raw.githubusercontent.com')) {
+                    errorMsg = 'Link salah! Gunakan raw.githubusercontent.com (bukan github.com/blob). Lihat Panduan Upload.';
+                } else if (src.includes('raw.githubusercontent.com')) {
+                    errorMsg = 'File tidak ditemukan di GitHub. Periksa nama file dan path-nya.';
+                } else if (!src || src === window.location.href) {
+                    errorMsg = 'URL audio kosong. Isi audioUrl di kode.';
+                } else {
+                    errorMsg = 'File audio tidak bisa diakses. Periksa koneksi atau link-nya.';
+                }
+                
+                this.setStatus(errorMsg, 'error');
+            },
+
+            onAudioEnded: function() {
+                this.isPlaying = false;
+                document.getElementById('play-btn').innerHTML = "&#9658;";
+                const art = document.getElementById('album-art');
+                if (art) art.classList.remove('playing');
+                this.setStatus('Selesai', '');
+                document.getElementById('progress-bar').style.width = '100%';
+            },
+
+            // --- PROGRESS ---
+            updateProgress: function() {
+                if (!this.audio.duration || !isFinite(this.audio.duration)) return;
+                const percent = (this.audio.currentTime / this.audio.duration) * 100;
+                document.getElementById('progress-bar').style.width = percent + '%';
+                document.getElementById('time-current').innerText = this.formatTime(this.audio.currentTime);
+            },
+
+            resetProgressUI: function() {
+                document.getElementById('progress-bar').style.width = '0%';
+                document.getElementById('time-current').innerText = '0:00';
+                document.getElementById('time-total').innerText = '0:00';
+            },
+
+            formatTime: function(seconds) {
+                if (!seconds || !isFinite(seconds)) return '0:00';
+                const m = Math.floor(seconds / 60);
+                const s = Math.floor(seconds % 60);
+                return m + ':' + (s < 10 ? '0' : '') + s;
+            },
+
+            // --- UI HELPERS ---
+            setStatus: function(text, type) {
+                const el = document.getElementById('audio-status');
+                el.innerText = text;
+                el.className = 'audio-status' + (type ? ' ' + type : '');
+            },
+
+            showToast: function(message) {
+                const toast = document.getElementById('toast');
+                toast.innerText = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
             },
 
             toggleModal: function(show) {
-                const modal = document.getElementById('instruction-modal');
-                modal.style.display = show ? 'flex' : 'none';
+                document.getElementById('instruction-modal').style.display = show ? 'flex' : 'none';
             }
         };
 
-        // Jalankan saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', () => {
-            app.init();
-        });
+        // Jalankan
+        document.addEventListener('DOMContentLoaded', () => app.init());
     </script>
 </body>
 </html>
