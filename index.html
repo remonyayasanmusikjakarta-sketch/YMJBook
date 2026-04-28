@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YMJ Book - Musical Coloring Experience</title>
+    <style>
+        /* --- RESET & VARIABLES --- */
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --accent-color: #FFE66D;
+            --dark-color: #2C3E50;
+            --light-color: #F7F9FC;
+            --text-color: #333;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--light-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- LAYOUT UTAMA --- */
+        header {
+            background-color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: -1px;
+        }
+        .logo span { color: var(--dark-color); }
+
+        .nav-btn {
+            background: none;
+            border: 2px solid var(--secondary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: var(--secondary-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .nav-btn:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* --- HALAMAN LIBRARY (DAFTAR BUKU) --- */
+        #library-view { display: block; }
+        
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+        .hero p { color: #666; font-size: 1.1rem; }
+
+        .book-section { margin-bottom: 3rem; }
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-color);
+            padding-left: 1rem;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        .card-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background-color: #eee;
+        }
+
+        .card-body { padding: 1rem; flex: 1; }
+        .card-title { font-weight: 700; margin-bottom: 0.5rem; color: var(--dark-color); }
+        .card-subtitle { font-size: 0.9rem; color: #888; }
+
+        /* --- HALAMAN PLAYER (MUSIK) --- */
+        #player-view { display: none; }
+
+        .player-container {
+            max-width: 500px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: #666;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .back-btn:hover { color: var(--primary-color); }
+
+        .album-art {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 2rem;
+            border: 5px solid var(--light-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(78, 205, 196, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(78, 205, 196, 0); }
+        }
+
+        .track-info h2 { margin-bottom: 0.5rem; color: var(--dark-color); }
+        .track-info p { color: var(--primary-color); font-weight: 600; margin-bottom: 2rem; }
+
+        .controls { display: flex; justify-content: center; align-items: center; gap: 1.5rem; }
+        
+        .control-btn {
+            background: var(--light-color);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            font-size: 1.2rem;
+        }
+        .control-btn:hover { background: #ddd; }
+
+        .play-btn {
+            background: var(--primary-color);
+            color: white;
+            width: 70px;
+            height: 70px;
+            font-size: 2rem;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4);
+        }
+        .play-btn:hover { background: #ff5252; transform: scale(1.05); }
+
+        /* --- MODAL INSTRUKSI --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-content h2 { color: var(--dark-color); margin-bottom: 1rem; }
+        .modal-content ul { margin-left: 1.5rem; margin-bottom: 1.5rem; }
+        .modal-content li { margin-bottom: 0.5rem; }
+        .code-block {
+            background: #f4f4f4;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+        }
+        .close-modal {
+            background: var(--dark-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: var(--dark-color);
+            color: white;
+            margin-top: auto;
+        }
+        footer a { color: var(--accent-color); text-decoration: none; }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            .player-container { padding: 1.5rem; }
+            .album-art { width: 150px; height: 150px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <a href="#" class="logo" onclick="app.showLibrary()">YMJ <span>Book</span></a>
+        <button class="nav-btn" onclick="app.toggleModal(true)">Panduan Upload</button>
+    </header>
+
+    <main>
+        <!-- VIEW 1: LIBRARY (Daftar Buku & Instrumen) -->
+        <section id="library-view">
+            <div class="hero">
+                <h1>Selamat Datang di YMJ Book</h1>
+                <p>Scan QR Code di buku mewarnai untuk mendengar suaranya!</p>
+            </div>
+
+            <!-- Container Buku akan di-generate oleh JavaScript di sini -->
+            <div id="books-container"></div>
+        </section>
+
+        <!-- VIEW 2: PLAYER (Pemutar Musik) -->
+        <section id="player-view">
+            <div class="player-container">
+                <a href="#" class="back-btn" onclick="app.showLibrary()">&larr; Kembali ke Daftar</a>
+                
+                <img src="" alt="Instrument Cover" id="player-img" class="album-art">
+                
+                <div class="track-info">
+                    <h2 id="player-title">Judul Lagu</h2>
+                    <p id="player-instrument">Nama Alat Musik</p>
+                </div>
+
+                <div class="controls">
+                    <button class="control-btn" onclick="app.resetAudio()">&#8635;</button> <!-- Reset Icon -->
+                    <button class="control-btn play-btn" id="play-btn" onclick="app.togglePlay()">&#9658;</button> <!-- Play Icon -->
+                    <button class="control-btn" onclick="app.toggleMute()">&#128266;</button> <!-- Volume Icon -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Instruksi -->
+    <div id="instruction-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="app.toggleModal(false)">Tutup</button>
+            <h2>Cara Upload MP3 & Mengatur Link</h2>
+            <p>Karena ini adalah file HTML statis, Anda tidak bisa "upload" file langsung ke sini seperti di Instagram. Anda harus menghosting file MP3 Anda terlebih dahulu.</p>
+            <br>
+            <h3>Langkah-langkah:</h3>
+            <ol>
+                <li><strong>Siapkan File MP3:</strong> Pastikan nama file unik (contoh: <code>piano-buku1.mp3</code>).</li>
+                <li><strong>Upload ke Cloud Hosting:</strong> Gunakan layanan seperti Google Drive (set ke publik), Dropbox, atau hosting cPanel Anda.</li>
+                <li><strong>Copy Link Langsung (Direct Link):</strong> Pastikan link berakhiran <code>.mp3</code>, bukan halaman preview.</li>
+                <li><strong>Edit Kode:</strong> Buka file HTML ini, cari bagian JavaScript di bawah, dan ganti link dummy di dalam variabel <code>booksData</code>.</li>
+                <li><strong>Buat QR Code:</strong> Gunakan link website + parameter.
+                    <br><em>Contoh: <code>websiteanda.com?book=1&page=2</code></em>
+                </li>
+            </ol>
+            
+            <h3>Contoh Struktur Data di Kode:</h3>
+            <div class="code-block">
+{
+  id: 1,
+  title: "Buku Mewarnai Vol. 1",
+  pages: [
+    { id: 1, title: "Piano", audio: "LINK_MP3_DISINI" },
+    { id: 2, title: "Gitar", audio: "LINK_MP3_DISINI" }
+  ]
+}
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 YMJ Book. Educational Musical Coloring Book.</p>
+    </footer>
+
+    <!-- AUDIO PLAYER HIDDEN -->
+    <audio id="audio-element"></audio>
+
+    <script>
+        /**
+         * KONFIGURASI DATA BUKU
+         * Ganti 'audioUrl' dengan link MP3 asli Anda nanti.
+         * Ganti 'imgUrl' dengan link gambar alat musik Anda.
+         */
+        const booksData = [
+            {
+                id: 1,
+                title: "Buku Mewarnai Musikal Vol. 1",
+                description: "Koleksi alat musik tradisional dan modern.",
+                pages: [
+                    { 
+                        id: 1, 
+                        title: "Piano Besar", 
+                        instrument: "Piano",
+                        imgUrl: "https://picsum.photos/seed/piano/300/300", 
+                        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" // Ganti ini
+                    },
+                    { 
+                        id: 2, 
+                        title: "Gitar Akustik", 
+                        instrument: "Gitar",
+                        imgUrl: "https://picsum.photos/seed/guitar/300/300", 
+                        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" // Ganti ini
+                    },
+                    { 
+                        id: 3, 
+                        title: "Drum Set", 
+                        instrument: "Drum",
+                        imgUrl: "https://picsum.photos/seed/drum/300/300", 
+                        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" // Ganti ini
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Buku Mewarnai Musikal Vol. 2",
+                description: "Eksplorasi alat musik tiup dan gesek.",
+                pages: [
+                    { 
+                        id: 1, 
+                        title: "Biola Elegan", 
+                        instrument: "Biola",
+                        imgUrl: "https://picsum.photos/seed/violin/300/300", 
+                        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" 
+                    },
+                    { 
+                        id: 2, 
+                        title: "Saksofon Jazz", 
+                        instrument: "Saksofon",
+                        imgUrl: "https://picsum.photos/seed/sax/300/300", 
+                        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" 
+                    }
+                ]
+            }
+        ];
+
+        // --- APLIKASI UTAMA ---
+        const app = {
+            audio: document.getElementById('audio-element'),
+            isPlaying: false,
+
+            init: function() {
+                this.renderLibrary();
+                this.checkUrlParams();
+            },
+
+            // Render daftar buku di halaman utama
+            renderLibrary: function() {
+                const container = document.getElementById('books-container');
+                let html = '';
+
+                booksData.forEach(book => {
+                    html += `
+                        <div class="book-section">
+                            <h2 class="section-title">${book.title}</h2>
+                            <p style="margin-bottom: 1rem; color: #666;">${book.description}</p>
+                            <div class="cards-grid">
+                    `;
+
+                    book.pages.forEach(page => {
+                        html += `
+                            <a href="?book=${book.id}&page=${page.id}" class="card">
+                                <img src="${page.imgUrl}" alt="${page.title}" class="card-img">
+                                <div class="card-body">
+                                    <div class="card-title">${page.title}</div>
+                                    <div class="card-subtitle">Klik untuk dengarkan</div>
+                                </div>
+                            </a>
+                        `;
+                    });
+
+                    html += `</div></div>`;
+                });
+
+                container.innerHTML = html;
+            },
+
+            // Cek apakah URL punya parameter buku & halaman (untuk QR Code)
+            checkUrlParams: function() {
+                const params = new URLSearchParams(window.location.search);
+                const bookId = parseInt(params.get('book'));
+                const pageId = parseInt(params.get('page'));
+
+                if (bookId && pageId) {
+                    this.loadPlayer(bookId, pageId);
+                }
+            },
+
+            // Load tampilan player beserta datanya
+            loadPlayer: function(bookId, pageId) {
+                // Cari data
+                const book = booksData.find(b => b.id === bookId);
+                if (!book) return this.showLibrary();
+
+                const page = book.pages.find(p => p.id === pageId);
+                if (!page) return this.showLibrary();
+
+                // Update UI Player
+                document.getElementById('library-view').style.display = 'none';
+                document.getElementById('player-view').style.display = 'block';
+                
+                document.getElementById('player-img').src = page.imgUrl;
+                document.getElementById('player-title').innerText = page.title;
+                document.getElementById('player-instrument').innerText = "Instrumen: " + page.instrument;
+                document.title = "YMJ Book - " + page.title;
+
+                // Set Audio
+                this.audio.src = page.audioUrl;
+                this.playAudio();
+                
+                // Scroll ke atas
+                window.scrollTo(0,0);
+            },
+
+            // Kembali ke tampilan daftar
+            showLibrary: function() {
+                document.getElementById('player-view').style.display = 'none';
+                document.getElementById('library-view').style.display = 'block';
+                document.title = "YMJ Book - Musical Coloring Experience";
+                this.stopAudio();
+                
+                // Bersihkan URL parameter
+                window.history.pushState({}, document.title, window.location.pathname);
+            },
+
+            // Kontrol Audio
+            togglePlay: function() {
+                if (this.isPlaying) {
+                    this.pauseAudio();
+                } else {
+                    this.playAudio();
+                }
+            },
+
+            playAudio: function() {
+                this.audio.play();
+                this.isPlaying = true;
+                document.getElementById('play-btn').innerHTML = "&#10074;&#10074;"; // Pause Icon
+                document.querySelector('.album-art').style.animationPlayState = 'running';
+            },
+
+            pauseAudio: function() {
+                this.audio.pause();
+                this.isPlaying = false;
+                document.getElementById('play-btn').innerHTML = "&#9658;"; // Play Icon
+                document.querySelector('.album-art').style.animationPlayState = 'paused';
+            },
+
+            stopAudio: function() {
+                this.audio.pause();
+                this.audio.currentTime = 0;
+                this.isPlaying = false;
+                document.getElementById('play-btn').innerHTML = "&#9658;";
+            },
+
+            resetAudio: function() {
+                this.audio.currentTime = 0;
+                this.playAudio();
+            },
+
+            toggleMute: function() {
+                this.audio.muted = !this.audio.muted;
+            },
+
+            toggleModal: function(show) {
+                const modal = document.getElementById('instruction-modal');
+                modal.style.display = show ? 'flex' : 'none';
+            }
+        };
+
+        // Jalankan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
