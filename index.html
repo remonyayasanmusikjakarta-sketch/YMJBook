@@ -88,17 +88,50 @@
         }
         .hero p { color: #666; font-size: 1.1rem; }
 
-        .book-section { margin-bottom: 3rem; }
+        /* --- BOOK SECTION DENGAN COVER --- */
+        .book-section { margin-bottom: 3.5rem; }
+        .book-section-header {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .book-cover-thumb {
+            width: 100px;
+            height: 130px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #eee, #ddd);
+        }
+
+        .book-cover-thumb-placeholder {
+            width: 100px;
+            height: 130px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .book-header-text { flex: 1; }
         .section-title {
             font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
             border-left: 5px solid var(--primary-color);
             padding-left: 1rem;
         }
         .section-desc {
-            margin-bottom: 1.5rem;
             color: #666;
             padding-left: 1.25rem;
+            font-size: 0.95rem;
         }
 
         .cards-grid {
@@ -127,25 +160,42 @@
 
         .card-img {
             width: 100%;
-            height: 140px;
-            object-fit: cover;
+            height: 160px;
             background-color: #eee;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            position: relative;
         }
         .card-img img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .card:hover .card-img img {
+            transform: scale(1.05);
         }
         .card-img .placeholder-icon {
-            font-size: 3rem;
-            opacity: 0.3;
+            font-size: 3.5rem;
+            opacity: 0.25;
+        }
+
+        /* Overlay gradien di bawah gambar card */
+        .card-img::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.08));
+            pointer-events: none;
         }
 
         /* Badge untuk tanpa audio */
-        .card.no-audio::after {
+        .card.no-audio::before {
             content: 'Tanpa Audio';
             position: absolute;
             top: 10px;
@@ -153,8 +203,9 @@
             background: rgba(0,0,0,0.6);
             color: white;
             font-size: 0.65rem;
-            padding: 2px 8px;
+            padding: 3px 10px;
             border-radius: 10px;
+            z-index: 2;
         }
 
         .card-body { padding: 1rem; flex: 1; }
@@ -188,14 +239,14 @@
 
         .album-art-wrapper {
             position: relative;
-            width: 200px;
-            height: 200px;
+            width: 240px;
+            height: 240px;
             margin: 0 auto 2rem;
         }
 
         .album-art {
-            width: 200px;
-            height: 200px;
+            width: 240px;
+            height: 240px;
             border-radius: 50%;
             object-fit: cover;
             border: 5px solid var(--light-color);
@@ -206,14 +257,14 @@
         }
 
         .album-art-placeholder {
-            width: 200px;
-            height: 200px;
+            width: 240px;
+            height: 240px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
+            font-size: 5rem;
             color: white;
             border: 5px solid var(--light-color);
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
@@ -379,6 +430,9 @@
             opacity: 1;
         }
 
+        /* --- IMAGE ERROR FALLBACK --- */
+        .img-error-hidden { display: none !important; }
+
         footer {
             text-align: center;
             padding: 2rem;
@@ -391,8 +445,13 @@
             .hero h1 { font-size: 1.8rem; }
             main { padding: 1rem; }
             .player-container { padding: 1.5rem; margin: 1rem auto; }
-            .album-art, .album-art-placeholder { width: 150px; height: 150px; }
+            .album-art, .album-art-placeholder { width: 180px; height: 180px; }
+            .album-art-wrapper { width: 180px; height: 180px; }
             .cards-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+            .book-section-header { flex-direction: column; text-align: center; }
+            .book-cover-thumb, .book-cover-thumb-placeholder { width: 80px; height: 105px; }
+            .section-title { border-left: none; padding-left: 0; border-bottom: 3px solid var(--primary-color); padding-bottom: 0.3rem; }
+            .section-desc { padding-left: 0; }
         }
     </style>
 </head>
@@ -418,7 +477,7 @@
                 <a href="#" class="back-btn" onclick="app.showLibrary(); return false;">&larr; Kembali ke Daftar</a>
 
                 <div class="album-art-wrapper" id="album-art-wrapper">
-                    <!-- Diisi动态 oleh JS -->
+                    <!-- Diisi oleh JS -->
                 </div>
 
                 <div class="track-info">
@@ -449,39 +508,48 @@
     <div id="instruction-modal" class="modal-overlay" onclick="if(event.target===this)app.toggleModal(false)">
         <div class="modal-content">
             <button class="close-modal" onclick="app.toggleModal(false)">Tutup</button>
-            <h2>Cara Upload MP3 ke GitHub & Mengatur Link</h2>
+            <h2>Cara Upload Foto & MP3 ke GitHub</h2>
 
             <div class="warning-box">
                 <strong>&#9888; Kesalahan Umum:</strong> Link seperti 
                 <code>github.com/user/repo/blob/main/file.mp3</code> 
-                adalah halaman web, BUKAN file MP3! Browser tidak bisa memutarnya.
+                adalah halaman web, BUKAN file asli! Browser tidak bisa memutarnya.
             </div>
 
-            <h3>Perbedaan Link:</h3>
+            <h3>Link yang Benar (Raw):</h3>
             <div class="code-block"><span class="wrong">https://github.com/user/repo/blob/main/file.mp3</span>
 <span class="correct">https://raw.githubusercontent.com/user/repo/main/file.mp3</span></div>
 
-            <h3>Langkah yang Benar:</h3>
+            <h3>Cara Mendapatkan Raw Link:</h3>
             <ol>
-                <li><strong>Upload file MP3</strong> ke repository GitHub kamu (drag & drop ke browser atau pakai Git).</li>
-                <li><strong>Klik file MP3</strong> di GitHub, lalu klik tombol <strong>"Raw"</strong> di pojok kanan atas.</li>
-                <li><strong>Copy URL dari halaman Raw</strong> itu — harus dimulai dengan <code>raw.githubusercontent.com</code>.</li>
-                <li><strong>Paste ke kode</strong> di bagian <code>audioUrl</code> di variabel <code>booksData</code>.</li>
+                <li><strong>Upload file</strong> (gambar JPG/PNG atau MP3) ke repository GitHub.</li>
+                <li><strong>Klik file</strong> di GitHub, lalu klik tombol <strong>"Raw"</strong> di pojok kanan atas.</li>
+                <li><strong>Copy URL</strong> — harus dimulai dengan <code>raw.githubusercontent.com</code>.</li>
+                <li><strong>Paste ke kode</strong> di field <code>coverImage</code> atau <code>imageUrl</code> atau <code>audioUrl</code>.</li>
             </ol>
 
-            <h3>Contoh di Kode:</h3>
+            <h3>Contoh Menambahkan Foto:</h3>
             <div class="code-block">{
   id: 1,
   title: "Violin Sound",
   instrument: "Piano",
-  audioUrl: "https://raw.githubusercontent.com/USERNAME/REPO/main/file.mp3"
+  imageUrl: "https://raw.githubusercontent.com/USER/REPO/main/violin.jpg",
+  audioUrl: "https://raw.githubusercontent.com/USER/REPO/main/violin.mp3"
 }</div>
 
-            <h3>Batasan GitHub:</h3>
+            <h3>Format Gambar yang Didukung:</h3>
             <ul>
-                <li>Ukuran file maksimal <strong>25 MB</strong> per file.</li>
-                <li>Jika file lebih besar, gunakan layanan lain seperti Dropbox (direct link), Cloudflare R2, atau hosting sendiri.</li>
-                <li>GitHub Pages juga bisa dipakai, tapi tetap pakai path <code>/file.mp3</code> bukan <code>/blob/main/file.mp3</code>.</li>
+                <li><strong>JPG / JPEG</strong> — paling direkomendasikan (ukuran kecil)</li>
+                <li><strong>PNG</strong> — kualitas tinggi tapi file lebih besar</li>
+                <li><strong>WebP</strong> — ukuran paling kecil, didukung browser modern</li>
+                <li>Batasan GitHub: <strong>25 MB</strong> per file</li>
+            </ul>
+
+            <h3>Tips Ukuran Foto:</h3>
+            <ul>
+                <li>Cover buku: <strong>200x260 px</strong> sudah cukup</li>
+                <li>Foto halaman: <strong>400x300 px</strong> sudah cukup</li>
+                <li>Perkecil foto sebelum upload agar loading cepat</li>
             </ul>
         </div>
     </div>
@@ -498,16 +566,20 @@
     <script>
         /**
          * ============================================
-         *  DATA BUKU - GANTI audioUrl DENGAN RAW LINK
+         *  DATA BUKU
          * ============================================
          * 
-         * CARA DAPATKAN RAW LINK:
-         * 1. Buka file MP3 di GitHub
-         * 2. Klik tombol "Raw" di atas kanan
-         * 3. Copy URL-nya (harus berawalan raw.githubusercontent.com)
+         * FIELD GAMBAR:
+         * - coverImage  → foto cover buku (tampil di samping judul buku)
+         * - imageUrl    → foto per halaman (tampil di card & player)
+         * 
+         * Keduanya OPSIONAL. Kalau kosong (""),
+         * otomatis tampil emoji placeholder.
+         * 
+         * PAKAI RAW LINK dari GitHub:
+         * https://raw.githubusercontent.com/USER/REPO/main/file.jpg
          */
 
-        // Ikon placeholder untuk setiap instrumen (emoji)
         const instrumentIcons = {
             'Piano': '🎹', 'Violin Sound': '🎻', 'Viola': '🎻', 'Cello': '🎻',
             'Contrabass': '🎻', 'String Section': '🎵', 'Flute': '🪈',
@@ -524,54 +596,63 @@
                 id: 1,
                 title: "Buku Mewarnai Yumi 1",
                 description: "Audio Musik Buku Mewarnai - Orkestra Lengkap",
+
+                // >>> FOTO COVER BUKU (opsional, isi raw link di sini) <<<
+                coverImage: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/blob/main/Full%20file%20Buku%20Mewarnai%20Yumi%20(5).pdf%20(40).png",
+                coverImage: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/blob/main/Full%20file%20Buku%20Mewarnai%20Yumi%20(5).pdf%20(41).png",
+
                 pages: [
                     { 
                         id: 1, 
                         title: "Violin Sound", 
                         instrument: "Piano",
-                        // ⬇️ INI YANG SALAH: link blob/github page, bukan raw file
-                        // audioUrl: "https://github.com/reemonyayasanmusikjakarta-sketch/YMJBook/blob/main/Massenet_Thaïs...mp3"
-                        // 
-                        // ⬇️ INI YANG BENAR: pakai raw.githubusercontent.com
+                        // >>> FOTO HALAMAN (opsional, isi raw link di sini) <<<
+                        imageUrl: "",
                         audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3"
                     },
-                    { id: 2, title: "Viola", instrument: "Viola", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 3, title: "Cello", instrument: "Cello", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 4, title: "Contrabass", instrument: "Contrabass", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 5, title: "String Section", instrument: "String Section", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 6, title: "Flute", instrument: "Flute", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 7, title: "Oboe", instrument: "Oboe", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 8, title: "Clarinet", instrument: "Clarinet", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 9, title: "Bassoon", instrument: "Bassoon", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 10, title: "Woodwind Section", instrument: "Woodwind Section", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 11, title: "French horn", instrument: "French horn", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 12, title: "Trumpet", instrument: "Trumpet", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 13, title: "Trombone", instrument: "Trombone", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 14, title: "Tuba", instrument: "Tuba", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 15, title: "Brass Section", instrument: "Brass Section", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 16, title: "Snare Drum", instrument: "Snare Drum", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 17, title: "Xylophone", instrument: "Xylophone", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 18, title: "Cymbals", instrument: "Cymbals", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 19, title: "Drumset", instrument: "Drumset", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 20, title: "Percussion Section", instrument: "Percussion Section", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
-                    { id: 21, title: "Piano", instrument: "Piano", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" }
+                    { id: 2, title: "Viola", instrument: "Viola", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 3, title: "Cello", instrument: "Cello", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 4, title: "Contrabass", instrument: "Contrabass", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 5, title: "String Section", instrument: "String Section", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 6, title: "Flute", instrument: "Flute", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 7, title: "Oboe", instrument: "Oboe", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 8, title: "Clarinet", instrument: "Clarinet", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 9, title: "Bassoon", instrument: "Bassoon", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 10, title: "Woodwind Section", instrument: "Woodwind Section", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 11, title: "French horn", instrument: "French horn", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 12, title: "Trumpet", instrument: "Trumpet", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 13, title: "Trombone", instrument: "Trombone", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/remonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 14, title: "Tuba", instrument: "Tuba", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/reemonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 15, title: "Brass Section", instrument: "Brass Section", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/reemonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 16, title: "Snare Drum", instrument: "Snare Drum", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/reemonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 17, title: "Xylophone", instrument: "Xylophone", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/reemonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 18, title: "Cymbals", instrument: "Cymbals", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/reemonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 19, title: "Drumset", instrument: "Drumset", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/reemonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 20, title: "Percussion Section", instrument: "Percussion Section", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/reemonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" },
+                    { id: 21, title: "Piano", instrument: "Piano", imageUrl: "", audioUrl: "https://raw.githubusercontent.com/reemonyayasanmusikjakarta-sketch/YMJBook/main/Massenet_%20Tha%C3%AFs%20-%20M%C3%A9ditation%20(Arr%20(mp3cut.net).mp3" }
                 ]
             },
             {
                 id: 2,
                 title: "Buku Mewarnai Musikal Vol. 2",
                 description: "Eksplorasi alat musik tiup dan gesek.",
+
+                // >>> FOTO COVER BUKU (opsional) <<<
+                coverImage: "",
+
                 pages: [
                     { 
                         id: 1, 
                         title: "Biola Elegan", 
                         instrument: "Biola",
+                        imageUrl: "",
                         audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" 
                     },
                     { 
                         id: 2, 
                         title: "Saksofon Jazz", 
                         instrument: "Saksofon",
+                        imageUrl: "",
                         audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" 
                     }
                 ]
@@ -589,7 +670,6 @@
                 this.renderLibrary();
                 this.checkUrlParams();
 
-                // Event listener untuk audio
                 this.audio.addEventListener('loadedmetadata', () => this.onAudioLoaded());
                 this.audio.addEventListener('timeupdate', () => this.updateProgress());
                 this.audio.addEventListener('ended', () => this.onAudioEnded());
@@ -605,10 +685,23 @@
                 let html = '';
 
                 booksData.forEach(book => {
+                    // Header buku: cover + judul
+                    const coverHtml = book.coverImage
+                        ? `<img class="book-cover-thumb" src="${book.coverImage}" alt="${book.title}" onerror="this.classList.add('img-error-hidden'); this.nextElementSibling.style.display='flex';">`
+                        : '';
+                    const coverFallbackHtml = book.coverImage
+                        ? `<div class="book-cover-thumb-placeholder" style="display:none;">📖</div>`
+                        : `<div class="book-cover-thumb-placeholder">📖</div>`;
+
                     html += `
                         <div class="book-section">
-                            <h2 class="section-title">${book.title}</h2>
-                            <p class="section-desc">${book.description}</p>
+                            <div class="book-section-header">
+                                ${coverHtml}${coverFallbackHtml}
+                                <div class="book-header-text">
+                                    <h2 class="section-title">${book.title}</h2>
+                                    <p class="section-desc">${book.description}</p>
+                                </div>
+                            </div>
                             <div class="cards-grid">
                     `;
 
@@ -616,12 +709,20 @@
                         const hasAudio = page.audioUrl && page.audioUrl.trim() !== '';
                         const icon = instrumentIcons[page.title] || instrumentIcons[page.instrument] || '🎵';
                         
+                        // Gambar halaman atau fallback emoji
+                        let imgHtml;
+                        if (page.imageUrl) {
+                            imgHtml = `<img src="${page.imageUrl}" alt="${page.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><span class="placeholder-icon" style="display:none;">${icon}</span>`;
+                        } else {
+                            imgHtml = `<span class="placeholder-icon">${icon}</span>`;
+                        }
+
                         html += `
                             <a href="?book=${book.id}&page=${page.id}" 
                                class="card ${hasAudio ? '' : 'no-audio'}" 
                                ${!hasAudio ? 'onclick="app.showToast(\'Audio belum tersedia untuk halaman ini\'); return false;"' : ''}>
                                 <div class="card-img">
-                                    <span class="placeholder-icon">${icon}</span>
+                                    ${imgHtml}
                                 </div>
                                 <div class="card-body">
                                     <div class="card-title">${page.title}</div>
@@ -637,12 +738,11 @@
                 container.innerHTML = html;
             },
 
-            // --- URL PARAMS (QR Code support) ---
+            // --- URL PARAMS ---
             checkUrlParams: function() {
                 const params = new URLSearchParams(window.location.search);
                 const bookId = parseInt(params.get('book'));
                 const pageId = parseInt(params.get('page'));
-
                 if (bookId && pageId) {
                     this.loadPlayer(bookId, pageId);
                 }
@@ -656,35 +756,38 @@
                 const page = book.pages.find(p => p.id === pageId);
                 if (!page) return this.showLibrary();
 
-                // Validasi audio
                 if (!page.audioUrl || page.audioUrl.trim() === '') {
                     this.showToast('Audio belum tersedia untuk halaman ini');
                     return this.showLibrary();
                 }
 
-                // Switch view
                 document.getElementById('library-view').style.display = 'none';
                 document.getElementById('player-view').style.display = 'block';
 
-                // Set info
                 document.getElementById('player-title').innerText = page.title;
                 document.getElementById('player-instrument').innerText = "Instrumen: " + page.instrument;
                 document.title = "YMJ Book - " + page.title;
 
-                // Set album art (emoji placeholder)
+                // Album art: gambar atau fallback emoji
                 const icon = instrumentIcons[page.title] || instrumentIcons[page.instrument] || '🎵';
-                document.getElementById('album-art-wrapper').innerHTML = 
-                    `<div class="album-art-placeholder" id="album-art">${icon}</div>`;
+                const wrapper = document.getElementById('album-art-wrapper');
 
-                // Reset state
+                if (page.imageUrl) {
+                    wrapper.innerHTML = `
+                        <img class="album-art" id="album-art" src="${page.imageUrl}" alt="${page.title}"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="album-art-placeholder" id="album-art-fallback" style="display:none;">${icon}</div>
+                    `;
+                } else {
+                    wrapper.innerHTML = `<div class="album-art-placeholder" id="album-art">${icon}</div>`;
+                }
+
                 this.resetProgressUI();
                 this.setStatus('Memuat audio...', 'loading');
                 document.getElementById('play-btn').disabled = true;
 
-                // Set & load audio
                 this.audio.src = page.audioUrl;
                 this.audio.load();
-
                 window.scrollTo(0, 0);
             },
 
@@ -699,19 +802,17 @@
 
             // --- AUDIO CONTROLS ---
             togglePlay: function() {
-                if (this.isPlaying) {
-                    this.pauseAudio();
-                } else {
-                    this.playAudio();
-                }
+                this.isPlaying ? this.pauseAudio() : this.playAudio();
             },
 
             playAudio: function() {
                 this.audio.play().then(() => {
                     this.isPlaying = true;
                     document.getElementById('play-btn').innerHTML = "&#10074;&#10074;";
-                    const art = document.getElementById('album-art');
-                    if (art) art.classList.add('playing');
+                    // Animasi pulse untuk gambar DAN fallback
+                    document.querySelectorAll('#album-art-wrapper .album-art, #album-art-wrapper .album-art-placeholder').forEach(el => {
+                        el.classList.add('playing');
+                    });
                 }).catch(err => {
                     console.error('Play error:', err);
                     this.setStatus('Gagal memutar audio', 'error');
@@ -722,8 +823,9 @@
                 this.audio.pause();
                 this.isPlaying = false;
                 document.getElementById('play-btn').innerHTML = "&#9658;";
-                const art = document.getElementById('album-art');
-                if (art) art.classList.remove('playing');
+                document.querySelectorAll('#album-art-wrapper .album-art, #album-art-wrapper .album-art-placeholder').forEach(el => {
+                    el.classList.remove('playing');
+                });
             },
 
             stopAudio: function() {
@@ -756,52 +858,45 @@
             onAudioLoaded: function() {
                 document.getElementById('time-total').innerText = this.formatTime(this.audio.duration);
             },
-
             onCanPlay: function() {
                 document.getElementById('play-btn').disabled = false;
                 this.setStatus('Siap diputar', '');
-                // Auto-play
                 this.playAudio();
             },
-
             onAudioPlaying: function() {
                 this.setStatus('Sedang memutar...', '');
             },
-
             onAudioWaiting: function() {
                 this.setStatus('Buffering...', 'loading');
             },
-
             onAudioError: function(e) {
                 console.error('Audio error:', e);
-                const art = document.getElementById('album-art');
-                if (art) art.classList.remove('playing');
+                document.querySelectorAll('#album-art-wrapper .album-art, #album-art-wrapper .album-art-placeholder').forEach(el => {
+                    el.classList.remove('playing');
+                });
                 document.getElementById('play-btn').disabled = true;
                 this.isPlaying = false;
                 document.getElementById('play-btn').innerHTML = "&#9658;";
 
-                // Deteksi jenis error
                 const src = this.audio.src;
                 let errorMsg = 'Gagal memuat audio.';
-                
                 if (src.includes('github.com/') && !src.includes('raw.githubusercontent.com')) {
-                    errorMsg = 'Link salah! Gunakan raw.githubusercontent.com (bukan github.com/blob). Lihat Panduan Upload.';
+                    errorMsg = 'Link salah! Gunakan raw.githubusercontent.com (bukan github.com/blob).';
                 } else if (src.includes('raw.githubusercontent.com')) {
                     errorMsg = 'File tidak ditemukan di GitHub. Periksa nama file dan path-nya.';
                 } else if (!src || src === window.location.href) {
-                    errorMsg = 'URL audio kosong. Isi audioUrl di kode.';
+                    errorMsg = 'URL audio kosong.';
                 } else {
                     errorMsg = 'File audio tidak bisa diakses. Periksa koneksi atau link-nya.';
                 }
-                
                 this.setStatus(errorMsg, 'error');
             },
-
             onAudioEnded: function() {
                 this.isPlaying = false;
                 document.getElementById('play-btn').innerHTML = "&#9658;";
-                const art = document.getElementById('album-art');
-                if (art) art.classList.remove('playing');
+                document.querySelectorAll('#album-art-wrapper .album-art, #album-art-wrapper .album-art-placeholder').forEach(el => {
+                    el.classList.remove('playing');
+                });
                 this.setStatus('Selesai', '');
                 document.getElementById('progress-bar').style.width = '100%';
             },
@@ -813,13 +908,11 @@
                 document.getElementById('progress-bar').style.width = percent + '%';
                 document.getElementById('time-current').innerText = this.formatTime(this.audio.currentTime);
             },
-
             resetProgressUI: function() {
                 document.getElementById('progress-bar').style.width = '0%';
                 document.getElementById('time-current').innerText = '0:00';
                 document.getElementById('time-total').innerText = '0:00';
             },
-
             formatTime: function(seconds) {
                 if (!seconds || !isFinite(seconds)) return '0:00';
                 const m = Math.floor(seconds / 60);
@@ -833,20 +926,17 @@
                 el.innerText = text;
                 el.className = 'audio-status' + (type ? ' ' + type : '');
             },
-
             showToast: function(message) {
                 const toast = document.getElementById('toast');
                 toast.innerText = message;
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 3000);
             },
-
             toggleModal: function(show) {
                 document.getElementById('instruction-modal').style.display = show ? 'flex' : 'none';
             }
         };
 
-        // Jalankan
         document.addEventListener('DOMContentLoaded', () => app.init());
     </script>
 </body>
